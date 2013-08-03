@@ -1,12 +1,20 @@
 import sys
 from xml.etree import ElementTree as ET
 
-document = ET.parse(sys.argv[1])
-ns = 'http://www.w3.org/1999/xhtml'
-corners = ['xMin', 'xMax', 'yMin', 'yMax']
-# coordinates are in dpi, and computed from the top left corner
-words = []
-coords = []
-for i, page in enumerate(document.findall('.//{{{0}}}page'.format(ns))):
-    words.append([word.text for word in page.getchildren()])
-    coords.append([tuple([float(word.attrib[c]) for c in corners]) for word in page.getchildren()])
+def parse_coords(word):
+    # coordinates are in dpi, and computed from the top left corner
+    return tuple([word.attrib[c] for c in ['xMin', 'xMax', 'yMin', 'yMax']])
+
+def parse_book(book):
+    document = ET.parse(book)
+    ns = 'http://www.w3.org/1999/xhtml'
+
+    words = []
+    coords = []
+    for i, page in enumerate(document.findall('.//{{{0}}}page'.format(ns))):
+        words.append([word.text for word in page.getchildren()])
+        coords.append([parse_coords(word) for word in page.getchildren()])
+    return {"words": words, "coords": coords}
+
+if __name__=="__main__":
+    book = parse_book(sys.argv[1])
