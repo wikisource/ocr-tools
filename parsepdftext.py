@@ -11,10 +11,11 @@ def parse_book(book):
 
     words = []
     coords = []
-    for i, page in enumerate(document.findall('.//{{{0}}}page'.format(ns))):
+    for page in document.findall('.//{{{0}}}page'.format(ns)):
         words.append([word.text for word in page.getchildren()])
         coords.append([parse_coords(word) for word in page.getchildren()])
     return {"words": words, "coords": coords}
 
 if __name__=="__main__":
     book = parse_book(sys.argv[1])
+    print book['words'][14]
