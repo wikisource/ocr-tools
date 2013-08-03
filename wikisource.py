@@ -10,12 +10,15 @@ def get_page(title, page):
     params = { "action": "render", "title": "Page:" + title + "/" + str(page) }
     r = requests.get(URL, params=params)
     soup = BeautifulSoup(r.text, "lxml")
-    return soup.select("div.pagetext")[0]
+    return " ".join(soup.select("div.pagetext")[0].findAll(text=True))
 
-def get_book(title):
-    n_pages = 10
-    return [get_page(title, page) for page in xrange(1, n_pages)]
+def get_pages(title, begin=1, end=None):
+    if not end:
+        end = 10
+    for page in xrange(begin, end+1):
+        yield get_page(title, page)
 
 if __name__ == "__main__":
     title = sys.argv[1]
-    print get_book(title)
+    for page in get_pages(title):
+        print page
