@@ -86,22 +86,32 @@ def align(l1, l2):
 
     for i in xrange(1, n + 1):
         a[i][0] = i * del_cost1, [-1] * i
+
         for j in xrange(1, m + 1):
-            s1, a1 = a[i-1][j-1]
+            l = [] # contains the different options
+
+            # mapping l1[i-1] to l2[j-1]
+            s, b = a[i-1][j-1]
             d = levenshtein(l1[i-1], l2[j-1])
-            s2, a2 = a[i-1][j]
-            s3, a3 = a[i][j-1]
-            l = [(s1 + w * d, a1 + [j-1]),
-                 (s2 + del_cost1, a2 + [-1]),
-                 (s3 + del_cost2, a3)]
-            if (j >= 2):
-                s4, a4 = a[i-1][j-2]
-                d2 = levenshtein(l1[i-1], join_words(l2[j-2:j]))
-                l += [(s4 + w * d2, a4 + [(j-2, j-1)])]
-            if (i >= 2):
-                s5, a5 = a[i-2][j-1]
-                d3 = levenshtein(join_words(l1[i-2:i]), l2[j-1])
-                l += [(s5 + w * d3, a5 + [j-1, j-1])]
+            l.append((s + w * d, b + [j-1]))
+
+            # deleting l1[i-1]
+            s, b = a[i-1][j]
+            l.append((s + del_cost1, b + [-1]))
+
+            # deleting l2[j-1]
+            s, b = a[i][j-1]
+            l.append((s + del_cost2, b))
+
+            if (j >= 2): # mapping l1[i-1] to l2[j-2] + l2[j-1]
+                s, b = a[i-1][j-2]
+                d = levenshtein(l1[i-1], join_words(l2[j-2:j]))
+                l.append((s + w * d, b + [(j-2, j-1)]))
+
+            if (i >= 2): # mapping l1[i-2]+l1[i-1] to l2[j-1]
+                s, b = a[i-2][j-1]
+                d = levenshtein(join_words(l1[i-2:i]), l2[j-1])
+                l.append((s + w * d, b + [j-1, j-1]))
 
             a[i][j] = min(l, key=lambda x: x[0])
 
