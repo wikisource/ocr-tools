@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 def levenshtein(word1, word2):
     """Return triplet of number of (substitutions, insertions, deletions) to
     transform word1 into word2.
