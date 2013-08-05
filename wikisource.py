@@ -4,7 +4,7 @@ import lxml
 import sys
 from bs4 import BeautifulSoup
 
-URL="http://fr.wikisource.org/w/index.php"
+URL = "http://fr.wikisource.org/w/index.php"
 
 def get_page(title, page):
     params = { "action": "render", "title": "Page:" + title + "/" + str(page) }

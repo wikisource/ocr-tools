@@ -1,12 +1,15 @@
+# -*- coding: utf-8 -*-
+
 from wikisource import get_page
 from parsedjvutext import parse_page_sexp
-from string_utils import LCS, printDiff
+import string_utils as su
 
-wikibook = "Villiers de L'Isle-Adam - Tribulat Bonhomet, 1908.djvu"
+wikibook = "Bloy - Le Sang du pauvre, Stock, 1932.djvu".replace(" ", "_")
+# wikibook = "Villiers de L'Isle-Adam - Tribulat Bonhomet, 1908.djvu".replace(" ", "_")
 
-n = 42
+n = 79
 ocrpage = parse_page_sexp(wikibook, n)
 l1 = ocrpage['words']
-l2 = get_page(wikibook, n).split()
-C = LCS(l1, l2)
-printDiff(C, l1, l2, len(l1), len(l2))
+l2 = get_page(wikibook, n).replace(u"’", u"'").split()
+C = su.align(l2, l1)
+su.print_alignment(l2, l1, C[1])
