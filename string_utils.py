@@ -1,34 +1,5 @@
 # -*- coding: utf-8 -*-
-
-def levenshtein(word1, word2):
-    """Return triplet of number of (substitutions, insertions, deletions) to
-    transform word1 into word2.
-
-    Dynamic programming implementation storing only two rows of the full matrix
-    at a time.
-
-    TODO: write this in a Cython module.
-    """
-
-    s, t = len(word1), len(word2)
-    if word1 == word2:
-        return 0
-    if not min(s, t):
-        return max(s, t)
-
-    v0 = [i for i in xrange(t + 1)] # v0[i] is d(0, i)
-    v1 = [0] * (t + 1)
-    for i in xrange(s):
-        # v0[j] = d(i, j) for all j and we compute v1[j] = d(i+1, j) for all j
-        v1[0] = i + 1
-
-        for j in xrange(t):
-            diff = int(word1[i] != word2[j])
-            v1[j+1] = min(v1[j] + 1, v0[j+1] + 1, v0[j] + diff)
-
-        v0 = list(v1) # copy v1 into v0 for the next iteration
-
-    return v1[t]
+from Levenshtein import distance as levenshtein
 
 def cut(word, left, right):
     """Return pair of strings (p + "-", s) such that p+s == word and
