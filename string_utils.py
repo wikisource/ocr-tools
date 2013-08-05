@@ -140,13 +140,20 @@ def print_alignment(l1, l2, alignment):
         else:
             if type(alignment[i]) == tuple:
                 begin, end = alignment[i][0], alignment[i][-1]
-                merge = True
             else:
                 begin, end = alignment[i], alignment[i]
-                merge = False
             while prev < begin - 1:
                 prev += 1
                 print u"{0:>25} | {1}".format("", l2[prev])
-            print u"{0:>25} | {1:<25} {2}".format(word, join_words(l2[begin:end+1]),
-                                                  "(M)" if merge else "")
             prev = end
+
+            if end > begin:
+                if end == begin + 1:
+                    l, r = cut(word, l2[begin], l2[end])
+                    print u"(S) {0:>21} | {1:<25}".format(l, l2[begin])
+                    print u"(S) {0:>21} | {1:<25}".format(r, l2[end])
+                else:
+                    print u"{0:>25} | {1:<25} (M)".format(word,
+                                                          join_words(l2[begin:end+1]))
+            else:
+                print u"{0:>25} | {1:<25}".format(word, l2[begin])
