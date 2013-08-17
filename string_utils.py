@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from Levenshtein import distance as levenshtein
+import re
 
 def simplify(text):
     mapp = [(u"’", u"'"), (u"↑", u"."), (u"…", u"..."), (u"É", u"E"),
@@ -171,3 +172,20 @@ def print_alignment(l1, l2, c2, alignment):
         for word in l2:
             print u"{0:>25} | {1}".format("", word)
 
+
+def alignment_to_sexp(alignment, sexp, l2):
+    alignment = iter(alignment)
+    for line in sexp:
+        if "word" not in line:
+            print line
+        else:
+            index = alignment.next()
+            if index == -1:
+                break
+            else:
+                re.sub("(?P<begin>\d+ \d+ \d+ \d+\s) \w+(?P<end>\)+$)",
+                       "\g<begin>{0}\g<end>".format(
+                           " ".join([l2[i] for i in list(index)])),
+                       line)
+                line.encode('string-escape')
+                print line

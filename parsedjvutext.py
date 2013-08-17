@@ -33,11 +33,14 @@ def parse_wordline(line):
     coords = map(int, line[1:5])
     return word, coords
 
-def parse_page_sexp(djvubook, pagenumber):
+def page_sexp(djvubook, pagenumber):
     args = ["djvused", "-e", "select {0};print-txt".format(pagenumber),
             djvubook]
-    page = [parse_wordline(line) for line in \
-            subprocess.check_output(args).split("\n") if "word" in line]
+    return subprocess.check_output(args).split("\n")
+
+def parse_page_sexp(djvubook, pagenumber):
+    page = [parse_wordline(line) for line in page_sexp(djvubook, pagenumber) \
+            if "word" in line]
     return {"words": [a for a, b in page], "coords": [b for a, b in page]}
 
 def parse_book_sexp(djvubook):
