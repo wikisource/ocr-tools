@@ -1,6 +1,15 @@
 # -*- coding: utf-8 -*-
 from Levenshtein import distance as levenshtein
 
+def simplify(text):
+    mapp = [(u"’", u"'"), (u"↑", u"."), (u"…", u"..."), (u"É", u"E"),
+            (u"À", u"A"), (u"Ô", u"O")]
+
+    for a, b in mapp:
+        text = text.replace(a, b)
+
+    return text
+
 def cut(word, left, right):
     """Return pair of strings (p + "-", s) such that p+s == word and
     L(p + "-", left) + L(s, right) is minimal, where L is the levenshtein
@@ -46,14 +55,10 @@ def printDiff(C, X, Y, i, j):
             print "- " + X[i-1]
 
 def join_words(l):
-    if len(l) == 0:
-        return ""
-    elif len(l) == 1:
-        return l[0]
-    else:
-        if l[-2][-1] == "-":
-            l[-2] = l[-2][:-1]
-        return "".join(l)
+    if len(l) >= 2 and l[-2][-1] == "-":
+        l[-2] = l[-2][:-1]
+
+    return "".join(l)
 
 def align(l1, l2):
     """Compute the optimal alignment between two list of words
@@ -72,9 +77,10 @@ def align(l1, l2):
     # and l2 as the OCR text. The deletion costs are not symmetric: removing
     # junk from the OCR is frequent while removing a word from the proofread
     # text should be rare.
-    del_cost1 = 20
-    del_cost2 = 3
-    w = 2 # multiplicative cost factor for the Levenshtein distance
+    del_cost1 = 30
+    def del_cost2(w):
+        return 1 + len([c for c in w if c.isalnum()])
+    w = 4 # multiplicative cost factor for the Levenshtein distance
 
     n, m = len(l1), len(l2)
     # a is the (score, alignment) matrix. a[i][j] is the (score, alignment)
@@ -82,38 +88,41 @@ def align(l1, l2):
     a = [[(0, [])] * (m + 1) for i in xrange(n + 1)]
 
     for j in xrange(1, m + 1):
-        a[0][j] = del_cost2 * j, []
+        a[0][j] = j, []
 
     for i in xrange(1, n + 1):
         a[i][0] = i * del_cost1, [-1] * i
 
         for j in xrange(1, m + 1):
-            l = [] # contains the different options
 
-            # mapping l1[i-1] to l2[j-1]
             s, b = a[i-1][j-1]
             d = levenshtein(l1[i-1], l2[j-1])
-            l.append((s + w * d, b + [j-1]))
+            min_s, min_b  = s + w * d, b + [j-1]
 
-            # deleting l1[i-1]
             s, b = a[i-1][j]
-            l.append((s + del_cost1, b + [-1]))
+            if s + del_cost1 < min_s:
+                min_s, min_b = s + del_cost1, b + [-1]
 
-            # deleting l2[j-1]
             s, b = a[i][j-1]
-            l.append((s + del_cost2, b))
+            if s + del_cost2(l2[j-1]) < min_s:
+                min_s, min_b = s + del_cost2(l2[j-1]), b
 
-            if (j >= 2): # mapping l1[i-1] to l2[j-2] + l2[j-1]
-                s, b = a[i-1][j-2]
-                d = levenshtein(l1[i-1], join_words(l2[j-2:j]))
-                l.append((s + w * d, b + [(j-2, j-1)]))
+            for k in xrange(1, 5):
+                for l in xrange(1, 5):
+                    if k + l <= 2:
+                        continue
+                    if k+l > 6:
+                        break
+                    if j < l or i < k:
+                        break
+                    s, b = a[i-k][j-l]
+                    d = levenshtein(join_words(l1[i-k:i]),
+                                    join_words(l2[j-l:j]))
+                    if s + w * d + k < min_s:
+                        temp = [j-1] if l == 1 else [tuple(range(j-l, j))]
+                        min_s, min_b = s + w * d + k, b + temp * k
 
-            if (i >= 2): # mapping l1[i-2]+l1[i-1] to l2[j-1]
-                s, b = a[i-2][j-1]
-                d = levenshtein(join_words(l1[i-2:i]), l2[j-1])
-                l.append((s + w * d, b + [j-1, j-1]))
-
-            a[i][j] = min(l, key=lambda x: x[0])
+            a[i][j] = min_s, min_b
 
     return a[n][m]
 
@@ -131,29 +140,31 @@ def print_alignment(l1, l2, alignment):
             l.append(word)
             m.append(index)
         return l, m
-    l1, alignment = reduce(aux, zip(l1, alignment), ([""],  [alignment[0]]))
+    if l1:
+        l1, alignment = reduce(aux, zip(l1, alignment), ([""],  [alignment[0]]))
 
     prev = 0
-    for (i, word) in enumerate(l1):
-        if alignment[i] == -1:
+    for index, word in zip(alignment, l1):
+        if index == -1:
             print u"{0:>25} | ".format(word)
         else:
-            if type(alignment[i]) == tuple:
-                begin, end = alignment[i][0], alignment[i][-1]
+            if type(index) == tuple:
+                begin, end = index[0], index[-1]
             else:
-                begin, end = alignment[i], alignment[i]
+                begin, end = index, index
+
             while prev < begin - 1:
                 prev += 1
                 print u"{0:>25} | {1}".format("", l2[prev])
             prev = end
 
             if end > begin:
-                if end == begin + 1:
-                    l, r = cut(word, l2[begin], l2[end])
-                    print u"(S) {0:>21} | {1:<25}".format(l, l2[begin])
-                    print u"(S) {0:>21} | {1:<25}".format(r, l2[end])
-                else:
-                    print u"{0:>25} | {1:<25} (M)".format(word,
-                                                          join_words(l2[begin:end+1]))
+                print u"{0:>25} | {1:<25} (M)".format(word,
+                                                      join_words(l2[begin:end+1]))
             else:
                 print u"{0:>25} | {1:<25}".format(word, l2[begin])
+
+    if not l1:
+        for word in l2:
+            print u"{0:>25} | {1}".format("", word)
+
