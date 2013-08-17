@@ -3,7 +3,7 @@ from Levenshtein import distance as levenshtein
 
 def simplify(text):
     mapp = [(u"’", u"'"), (u"↑", u"."), (u"…", u"..."), (u"É", u"E"),
-            (u"À", u"A"), (u"Ô", u"O")]
+            (u"À", u"A"), (u"Ô", u"O"), (u"—", u"-")]
 
     for a, b in mapp:
         text = text.replace(a, b)
@@ -54,13 +54,16 @@ def printDiff(C, X, Y, i, j):
             printDiff(C, X, Y, i-1, j)
             print "- " + X[i-1]
 
-def join_words(l):
-    if len(l) >= 2 and l[-2][-1] == "-":
+def join_ocr_words(l, c):
+    m = list(l)
+    if len(l) >= 2 and c[-2][2] > c[-1][0] and (not l[-2][-1].isalnum()):
         l[-2] = l[-2][:-1]
-
     return "".join(l)
 
-def align(l1, l2):
+def join_words(l):
+    return "".join(l)
+
+def align(l1, l2, c2):
     """Compute the optimal alignment between two list of words
     à la Needleman-Wunsch.
 
@@ -77,10 +80,10 @@ def align(l1, l2):
     # and l2 as the OCR text. The deletion costs are not symmetric: removing
     # junk from the OCR is frequent while removing a word from the proofread
     # text should be rare.
-    del_cost1 = 30
+    del_cost1 = 50
     def del_cost2(w):
-        return 1 + len([c for c in w if c.isalnum()])
-    w = 4 # multiplicative cost factor for the Levenshtein distance
+        return 1+3*len([c for c in w if c.isalnum()])
+    w = 3 # multiplicative cost factor for the Levenshtein distance
 
     n, m = len(l1), len(l2)
     # a is the (score, alignment) matrix. a[i][j] is the (score, alignment)
@@ -107,26 +110,26 @@ def align(l1, l2):
             if s + del_cost2(l2[j-1]) < min_s:
                 min_s, min_b = s + del_cost2(l2[j-1]), b
 
-            for k in xrange(1, 5):
+            for k in xrange(1, 8):
                 for l in xrange(1, 5):
                     if k + l <= 2:
                         continue
-                    if k+l > 6:
+                    if k+l > 7:
                         break
                     if j < l or i < k:
                         break
                     s, b = a[i-k][j-l]
                     d = levenshtein(join_words(l1[i-k:i]),
-                                    join_words(l2[j-l:j]))
-                    if s + w * d + k < min_s:
+                                    join_ocr_words(l2[j-l:j], c2[j-l:j]))
+                    if s + w * d < min_s:
                         temp = [j-1] if l == 1 else [tuple(range(j-l, j))]
-                        min_s, min_b = s + w * d + k, b + temp * k
+                        min_s, min_b = s + w * d, b + temp * k
 
             a[i][j] = min_s, min_b
 
     return a[n][m]
 
-def print_alignment(l1, l2, alignment):
+def print_alignment(l1, l2, c2, alignment):
     """Given two list of words and an alignment (as defined in :func:`align`)
     print the two list of words side-by-side and aligned.
     """
@@ -160,7 +163,7 @@ def print_alignment(l1, l2, alignment):
 
             if end > begin:
                 print u"{0:>25} | {1:<25} (M)".format(word,
-                                                      join_words(l2[begin:end+1]))
+                                                      join_ocr_words(l2[begin:end+1], c2[begin:end+1]))
             else:
                 print u"{0:>25} | {1:<25}".format(word, l2[begin])
 
