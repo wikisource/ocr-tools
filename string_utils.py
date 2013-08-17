@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from Levenshtein import distance as levenshtein
 import re
+import itertools
 
 def simplify(text):
     mapp = [(u"’", u"'"), (u"↑", u"."), (u"…", u"..."), (u"É", u"E"),
@@ -134,21 +135,9 @@ def print_alignment(l1, l2, c2, alignment):
     """Given two list of words and an alignment (as defined in :func:`align`)
     print the two list of words side-by-side and aligned.
     """
-
-    # collapse sequence of consecutive words in l1 which map to the same word
-    # in l2
-    def aux((l, m), (word, index)):
-        if index == m[-1]:
-            l[-1] += " " + word
-        else:
-            l.append(word)
-            m.append(index)
-        return l, m
-    if l1:
-        l1, alignment = reduce(aux, zip(l1, alignment), ([""],  [alignment[0]]))
-
     prev = 0
-    for index, word in zip(alignment, l1):
+    for index, g in itertools.groupby(zip(l1, alignment), lambda x:x[1]):
+        word = " ".join([a[0] for a in g])
         if index == -1:
             print u"{0:>25} | ".format(word)
         else:
