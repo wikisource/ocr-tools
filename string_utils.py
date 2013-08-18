@@ -172,9 +172,14 @@ def alignment_to_sexp(alignment, sexp, l2):
             if index == -1:
                 break
             else:
-                re.sub("(?P<begin>\d+ \d+ \d+ \d+\s) \w+(?P<end>\)+$)",
-                       "\g<begin>{0}\g<end>".format(
-                           " ".join([l2[i] for i in list(index)])),
-                       line)
-                line.encode('string-escape')
+                if type(index) == tuple:
+                    word = " ".join([l2[i] for i in list(index)])
+                else:
+                    try:
+                        word = l2[index]
+                    except IndexError:
+                        print index
+                word = word.encode("utf-8").encode("string-escape")
+                re.sub("(?P<begin>\d+ \d+ \d+ \d+\s)    \w+(?P<end>\)+$)",
+                       "\g<begin>{0}\g<end>".format(word), line)
                 print line
