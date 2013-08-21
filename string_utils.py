@@ -96,7 +96,7 @@ def align(l1, l2, c2):
         a[0][j] = j, []
 
     for i in xrange(1, n + 1):
-        a[i][0] = i * del_cost1, [] * i
+        a[i][0] = i * del_cost1, [[]] * i
 
         for j in xrange(1, m + 1):
 
@@ -142,10 +142,8 @@ def print_alignment(l1, l2, c2, alignment):
             print u"{0:>25} | ".format(word)
         else:
             begin, end = index[0], index[-1]
-
-            while prev < begin - 1:
-                prev += 1
-                print u"{0:>25} | {1}".format("", l2[prev])
+            for i in range(prev, begin-1):
+                print u"{0:>25} | {1}".format("", l2[i+1])
             prev = end
 
             if end > begin:
