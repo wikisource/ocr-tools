@@ -10,7 +10,7 @@ def get_page(title, page):
     params = { "action": "render", "title": "Page:" + title + "/" + str(page) }
     r = requests.get(URL, params=params)
     soup = BeautifulSoup(r.text, "lxml")
-    return "".join(soup.select("div.pagetext")[0].findAll(text=True))
+    return soup.select("div.pagetext")[0].text
 
 def get_pages(title, begin=1, end=None):
     if not end:
