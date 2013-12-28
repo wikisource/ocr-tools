@@ -70,11 +70,11 @@ def align(l1, l2, c2):
     à la Needleman-Wunsch.
 
     The function returns a (score, alignment) pair. An alignment is simply
-    a list of size len(l1) giving for each word in l1, the index of the word in
-    l2 it maps to (or -1 if the word maps to nothing).
+    a list of list of size len(l1) giving for each word in l1, the list of
+    indices in l2 it maps to (the list is empty if the word maps to nothing).
 
-    Note that we also allow the index to be a tuple when a word in l1 maps to
-    a sequence of words in l2. Conversly, consecutive words in l1 can map to
+    Note that if the list is of size>1, the word in l1 will map to a sequence
+    of words in l2. Conversly, consecutive words in l1 can map to
     the same word in l2.
     """
 
@@ -96,17 +96,17 @@ def align(l1, l2, c2):
         a[0][j] = j, []
 
     for i in xrange(1, n + 1):
-        a[i][0] = i * del_cost1, [-1] * i
+        a[i][0] = i * del_cost1, [[]] * i
 
         for j in xrange(1, m + 1):
 
             s, b = a[i-1][j-1]
             d = levenshtein(l1[i-1], l2[j-1])
-            min_s, min_b  = s + w * d, b + [j-1]
+            min_s, min_b  = s + w * d, b + [[j-1]]
 
             s, b = a[i-1][j]
             if s + del_cost1 < min_s:
-                min_s, min_b = s + del_cost1, b + [-1]
+                min_s, min_b = s + del_cost1, b + [[]]
 
             s, b = a[i][j-1]
             if s + del_cost2(l2[j-1]) < min_s:
@@ -124,7 +124,7 @@ def align(l1, l2, c2):
                     d = levenshtein(join_words(l1[i-k:i]),
                                     join_ocr_words(l2[j-l:j], c2[j-l:j]))
                     if s + w * d < min_s:
-                        temp = [j-1] if l == 1 else [tuple(range(j-l, j))]
+                        temp = [[j-1]] if l == 1 else [range(j-l, j)]
                         min_s, min_b = s + w * d, b + temp * k
 
             a[i][j] = min_s, min_b
@@ -138,17 +138,12 @@ def print_alignment(l1, l2, c2, alignment):
     prev = 0
     for index, g in itertools.groupby(zip(l1, alignment), lambda x:x[1]):
         word = " ".join([a[0] for a in g])
-        if index == -1:
+        if not index:
             print u"{0:>25} | ".format(word)
         else:
-            if type(index) == tuple:
-                begin, end = index[0], index[-1]
-            else:
-                begin, end = index, index
-
-            while prev < begin - 1:
-                prev += 1
-                print u"{0:>25} | {1}".format("", l2[prev])
+            begin, end = index[0], index[-1]
+            for i in range(prev, begin-1):
+                print u"{0:>25} | {1}".format("", l2[i+1])
             prev = end
 
             if end > begin:
