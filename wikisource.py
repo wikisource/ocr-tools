@@ -28,8 +28,3 @@ if __name__ == "__main__":
     title = sys.argv[1]
     for page in get_pages(title):
         print page
-
-
-def f(i):
-    if i <=10:
-        return i**2
