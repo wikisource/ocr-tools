@@ -29,44 +29,29 @@ def parse_page_xml(djvubook, pagenumber):
                 for word in all_words]
     return {"words": words, "coords": coords}
 
-def parse_wordline(line):
-    line = line.lstrip(" (").rstrip(")").split(" ")
-    word = line[5]
-    word = word[1:-1].decode("string_escape").decode("utf-8")
-    coords = map(int, line[1:5])
-    return word, coords
-
-def page_sexp(djvubook, pagenumber):
-    args = ["djvused", "-e", "select {0};print-txt".format(pagenumber),
-            djvubook]
-    return subprocess.check_output(args).split("\n")
-
-def parse_page_sexp(djvubook, pagenumber):
-    page = [parse_wordline(line) for line in page_sexp(djvubook, pagenumber) \
-            if "word" in line]
-    return {"words": [a for a, b in page], "coords": [b for a, b in page]}
-
-def parse_sexp(s):
+def parse_page_sexp(s, page_size=None):
     if type(s) is djvu.sexpr.ListExpression:
         if len(s) == 0:
-            return []
+            pass
         if str(s[0].value) == "word":
             coords = [s[i].value for i in xrange(1, 5)]
+            if page_size:
+                coords[1]=page_size-coords[1]
+                coords[3]=page_size-coords[3]
             word = s[5].value
-            return [(word, coords)]
+            yield (word, coords)
         else:
-            gen = chain.from_iterable(parse_sexp(child) for child in s[5:])
-            return list(gen)
+            for c in chain.from_iterable(parse_page_sexp(child, page_size) for child in s[5:]):
+                yield c
     else:
-        return []
+        pass
 
-def parse_book_sexp(djvubook, page=None, html=False):
+def parse_book(djvubook, page=None, html=False):
     """
     returns the list of words and coordinates from a djvu book.
     if page is None, returns the whole book.
     if html is True, coordinates are computed from the bottom of the page
     """
-    book = {"words": [], "coords": []}
     c = Context()
     document = c.new_document(djvu.decode.FileURI(djvubook))
     document.decoding_job.wait()
@@ -74,12 +59,19 @@ def parse_book_sexp(djvubook, page=None, html=False):
         toparse = [document.pages[page-1]]
     else:
         toparse = document.pages
-    for page in toparse:
-        gen = parse_sexp(page.text.sexpr)
-        word_coords = zip(*gen)
-        book["words"].append(word_coords[0])
-        book["coords"].append(word_coords[1])
-    return book
+    words = [[]] * len(toparse)
+    coords = [[]] * len(toparse)
+    page_size = None
+    for i, page in enumerate(toparse):
+        if page.text.sexpr:
+            if html:
+                page_size= p.size[1]
+            gen = parse_page_sexp(page.text.sexpr, page_size)
+            word_coords = zip(*gen)
+            words[i] = word_coords[0]
+            coords[i] = word_coords[1]
+
+    return {"words": words, "coords": coords}
 
 if __name__=="__main__":
-    book_sexp = parse_book_sexp(sys.argv[1])
+    book = parse_book(sys.argv[1])
