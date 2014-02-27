@@ -6,34 +6,6 @@ from djvu.decode import Context
 from itertools import chain
 import collections
 
-
-def parse_book_xml(djvubook):
-    args = ["djvutoxml", djvubook]
-    soup = BeautifulSoup(subprocess.check_output(args), "lxml")
-    words = []
-    coords = []
-    for page in soup.find_all("hiddentext"):
-        words.append([word.text for word in page.find_all("word")])
-        coords.append([tuple(map(int, word["coords"].split(",")))
-                       for word in page.find_all("word")])
-    return {"words": words, "coords": coords}
-
-
-def get_npages(djvubook):
-    args = ["djvused", "-e", "n", djvubook]
-    return int(subprocess.check_output(args))
-
-
-def parse_page_xml(djvubook, pagenumber):
-    args = ["djvutoxml", "--page", str(pagenumber), djvubook]
-    soup = BeautifulSoup(subprocess.check_output(args), "lxml")
-    all_words = soup.find_all("word")
-    words = [word.text for word in all_words]
-    coords = [tuple(map(int, word["coords"].split(",")))
-              for word in all_words]
-    return {"words": words, "coords": coords}
-
-
 def parse_page(page, html=False):
     s, page_size = page.text.sexpr, page.size[1]
 
