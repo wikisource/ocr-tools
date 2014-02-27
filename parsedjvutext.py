@@ -33,23 +33,26 @@ def parse_page_xml(djvubook, pagenumber):
     return {"words": words, "coords": coords}
 
 
-def parse_page_sexp(s, page_size=None):
-    if type(s) is djvu.sexpr.ListExpression:
-        if len(s) == 0:
-            pass
-        if str(s[0].value) == "word":
-            coords = [s[i].value for i in xrange(1, 5)]
-            if page_size:
-                coords[1] = page_size - coords[1]
-                coords[3] = page_size - coords[3]
-            word = s[5].value
-            yield (word, coords)
+def parse_page(page, html=False):
+    s, page_size = page.text.sexpr, page.size[1]
+
+    def aux(s):
+        if type(s) is djvu.sexpr.ListExpression:
+            if len(s) == 0:
+                pass
+            if str(s[0].value) == "word":
+                coords = [s[i].value for i in xrange(1, 5)]
+                if html:
+                    coords[1] = page_size - coords[1]
+                    coords[3] = page_size - coords[3]
+                word = s[5].value
+                yield (word, coords)
+            else:
+                for c in chain.from_iterable(aux(child) for child in s[5:]):
+                    yield c
         else:
-            for c in chain.from_iterable(parse_page_sexp(child, page_size)
-                                         for child in s[5:]):
-                yield c
-    else:
-        pass
+            pass
+    return aux(s)
 
 
 def parse_book(djvubook, page=None, html=False):
@@ -66,14 +69,8 @@ def parse_book(djvubook, page=None, html=False):
     else:
         toparse = document.pages
 
-    def gen_pages():
-        for i, page in enumerate(toparse):
-            if page.text.sexpr:
-                page_size = page.size[1] if html else None
-                gen = parse_page_sexp(page.text.sexpr, page_size)
-                yield zip(*gen)
-
-    return list(gen_pages())
+    return list(zip(*parse_page(page, html=html)) for page in toparse
+                if page.text.sexpr)
 
 if __name__ == "__main__":
     book = parse_book(sys.argv[1])
