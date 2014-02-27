@@ -67,11 +67,9 @@ def parse_book(djvubook, page=None, html=False):
         toparse = document.pages
 
     def gen_pages():
-        page_size = None
         for i, page in enumerate(toparse):
             if page.text.sexpr:
-                if html:
-                    page_size = page.size[1]
+                page_size = page.size[1] if html else None
                 gen = parse_page_sexp(page.text.sexpr, page_size)
                 yield zip(*gen)
 
