@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block main %}
+    <div id="image_container">
+        <img id="page" src="static/{{page_number}}.png" usemap="#wordmap" />
+    </div>
+    <map name="wordmap">{% for id, coords in areas %}
+        <area href="#" shape="rect" coords="{{coords}}" data-id="{{id}}" />{% end %}
+    </map>
+    <div id="text">
+    {% for id, word in words %}
+    <span id="{{id}}">{{word}}</span> {% end %}
+    </div>
+{% end %}

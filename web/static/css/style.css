@@ -1,0 +1,12 @@
+.selected {
+    background-color: rgba(255,0,0, 0.3);
+}
+
+span:hover {
+    background-color: rgba(255,0,0, 0.3);
+}
+
+#image_container {
+    float: left;
+    margin-right: 1em;
+}
