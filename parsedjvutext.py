@@ -9,23 +9,25 @@ import collections
 def parse_page(page, html=False):
     s, page_size = page.text.sexpr, page.size[1]
 
-    def aux(s):
+    def aux(s, html):
         if type(s) is djvu.sexpr.ListExpression:
             if len(s) == 0:
                 pass
             if str(s[0].value) == "word":
-                coords = [s[i].value for i in xrange(1, 5)]
                 if html:
-                    coords[1] = page_size - coords[1]
-                    coords[3] = page_size - coords[3]
+                    coords = (s[1].value, page_size - s[2].value,
+                              s[3].value, page_size - s[4].value)
+                    coords = ",".join(map(str,coords))
+                else:
+                    coords = [s[i].value for i in xrange(1, 5)]
                 word = s[5].value
                 yield (word, coords)
             else:
-                for c in chain.from_iterable(aux(child) for child in s[5:]):
+                for c in chain.from_iterable(aux(child, html) for child in s[5:]):
                     yield c
         else:
             pass
-    return aux(s)
+    return aux(s, html)
 
 
 def parse_book(djvubook, page=None, html=False):
