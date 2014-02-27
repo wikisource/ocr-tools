@@ -1,6 +1,5 @@
 import sys
 from bs4 import BeautifulSoup
-import subprocess
 import djvu
 from djvu.decode import Context
 from itertools import chain
@@ -42,7 +41,7 @@ def parse_book(djvubook, page=None, html=False):
     if type(page) is int:
         toparse = [document.pages[page - 1]]
     elif isinstance(page, collections.Iterable):
-        toparse = page
+        toparse = [document.pages[p - 1] for p in page]
     else:
         toparse = document.pages
 
@@ -50,4 +49,4 @@ def parse_book(djvubook, page=None, html=False):
                 if page.text.sexpr)
 
 if __name__ == "__main__":
-    book = parse_book(sys.argv[1])
+    book = parse_book(sys.argv[1], page=[10,11], html=True)
