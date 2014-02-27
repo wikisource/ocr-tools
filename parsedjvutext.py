@@ -71,7 +71,7 @@ def parse_book(djvubook, page=None, html=False):
     for i, page in enumerate(toparse):
         if page.text.sexpr:
             if html:
-                page_size = int(page.size[1])
+                page_size = page.size[1]
             gen = parse_page_sexp(page.text.sexpr, page_size)
             word_coords = zip(*gen)
             words[i] = word_coords[0]
