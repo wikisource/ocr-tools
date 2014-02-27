@@ -4,6 +4,7 @@ import subprocess
 import djvu
 from djvu.decode import Context
 from itertools import chain
+import collections
 
 
 def parse_book_xml(djvubook):
@@ -64,8 +65,10 @@ def parse_book(djvubook, page=None, html=False):
     c = Context()
     document = c.new_document(djvu.decode.FileURI(djvubook))
     document.decoding_job.wait()
-    if page:
+    if type(page) is int:
         toparse = [document.pages[page - 1]]
+    elif isinstance(page, collections.Iterable):
+        toparse = page
     else:
         toparse = document.pages
 
