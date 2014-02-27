@@ -5,7 +5,7 @@ import sys
 def gen_html(book, page_number):
     book = "../Villiers_de_L\'Isle-Adam_-_Tribulat_Bonhomet,_1908.djvu"
     d = parse_book(book, page=int(page_number), html=True)
-    coords, words = d["coords"][0], d["words"][0]
+    words, coords = d[0]
 
     def get_areas():
         for i, coord in enumerate(coords):

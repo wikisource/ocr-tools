@@ -65,19 +65,17 @@ def parse_book(djvubook, page=None, html=False):
         toparse = [document.pages[page - 1]]
     else:
         toparse = document.pages
-    words = [[]] * len(toparse)
-    coords = [[]] * len(toparse)
-    page_size = None
-    for i, page in enumerate(toparse):
-        if page.text.sexpr:
-            if html:
-                page_size = page.size[1]
-            gen = parse_page_sexp(page.text.sexpr, page_size)
-            word_coords = zip(*gen)
-            words[i] = word_coords[0]
-            coords[i] = word_coords[1]
 
-    return {"words": words, "coords": coords}
+    def gen_pages():
+        page_size = None
+        for i, page in enumerate(toparse):
+            if page.text.sexpr:
+                if html:
+                    page_size = page.size[1]
+                gen = parse_page_sexp(page.text.sexpr, page_size)
+                yield zip(*gen)
+
+    return list(gen_pages())
 
 if __name__ == "__main__":
     book = parse_book(sys.argv[1])
