@@ -5,6 +5,7 @@ import djvu
 from djvu.decode import Context
 from itertools import chain
 
+
 def parse_book_xml(djvubook):
     args = ["djvutoxml", djvubook]
     soup = BeautifulSoup(subprocess.check_output(args), "lxml")
@@ -12,22 +13,25 @@ def parse_book_xml(djvubook):
     coords = []
     for page in soup.find_all("hiddentext"):
         words.append([word.text for word in page.find_all("word")])
-        coords.append([tuple(map(int, word["coords"].split(","))) \
-                        for word in page.find_all("word")])
+        coords.append([tuple(map(int, word["coords"].split(",")))
+                       for word in page.find_all("word")])
     return {"words": words, "coords": coords}
+
 
 def get_npages(djvubook):
     args = ["djvused", "-e", "n", djvubook]
     return int(subprocess.check_output(args))
+
 
 def parse_page_xml(djvubook, pagenumber):
     args = ["djvutoxml", "--page", str(pagenumber), djvubook]
     soup = BeautifulSoup(subprocess.check_output(args), "lxml")
     all_words = soup.find_all("word")
     words = [word.text for word in all_words]
-    coords = [tuple(map(int, word["coords"].split(","))) \
-                for word in all_words]
+    coords = [tuple(map(int, word["coords"].split(",")))
+              for word in all_words]
     return {"words": words, "coords": coords}
+
 
 def parse_page_sexp(s, page_size=None):
     if type(s) is djvu.sexpr.ListExpression:
@@ -36,15 +40,17 @@ def parse_page_sexp(s, page_size=None):
         if str(s[0].value) == "word":
             coords = [s[i].value for i in xrange(1, 5)]
             if page_size:
-                coords[1]=page_size-coords[1]
-                coords[3]=page_size-coords[3]
+                coords[1] = page_size - coords[1]
+                coords[3] = page_size - coords[3]
             word = s[5].value
             yield (word, coords)
         else:
-            for c in chain.from_iterable(parse_page_sexp(child, page_size) for child in s[5:]):
+            for c in chain.from_iterable(parse_page_sexp(child, page_size)
+                                         for child in s[5:]):
                 yield c
     else:
         pass
+
 
 def parse_book(djvubook, page=None, html=False):
     """
@@ -56,7 +62,7 @@ def parse_book(djvubook, page=None, html=False):
     document = c.new_document(djvu.decode.FileURI(djvubook))
     document.decoding_job.wait()
     if page:
-        toparse = [document.pages[page-1]]
+        toparse = [document.pages[page - 1]]
     else:
         toparse = document.pages
     words = [[]] * len(toparse)
@@ -65,7 +71,7 @@ def parse_book(djvubook, page=None, html=False):
     for i, page in enumerate(toparse):
         if page.text.sexpr:
             if html:
-                page_size= p.size[1]
+                page_size = int(page.size[1])
             gen = parse_page_sexp(page.text.sexpr, page_size)
             word_coords = zip(*gen)
             words[i] = word_coords[0]
@@ -73,5 +79,5 @@ def parse_book(djvubook, page=None, html=False):
 
     return {"words": words, "coords": coords}
 
-if __name__=="__main__":
+if __name__ == "__main__":
     book = parse_book(sys.argv[1])
