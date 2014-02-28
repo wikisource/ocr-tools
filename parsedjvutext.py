@@ -15,8 +15,8 @@ def parse_page(page, html=False):
                 pass
             if str(s[0].value) == "word":
                 if html:
-                    coords = (s[1].value, page_size - s[2].value,
-                              s[3].value, page_size - s[4].value)
+                    coords = (s[1].value, page_size - s[4].value,
+                              s[3].value, page_size - s[2].value)
                     coords = ",".join(map(str,coords))
                 else:
                     coords = [s[i].value for i in xrange(1, 5)]
