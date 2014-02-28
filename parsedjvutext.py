@@ -21,7 +21,7 @@ def parse_page(page, html=False):
                 else:
                     coords = [s[i].value for i in xrange(1, 5)]
                 word = s[5].value
-                yield (word, coords)
+                yield (word.decode("utf-8"), coords)
             else:
                 for c in chain.from_iterable(aux(child, html) for child in s[5:]):
                     yield c
