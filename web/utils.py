@@ -3,9 +3,10 @@ import sys
 
 
 def gen_html(book, page_number):
-    book = "../Bloy_-_Le_Sang_du_pauvre,_Stock,_1932.djvu"
+    book = "../Villiers_de_L'Isle-Adam_-_Tribulat_Bonhomet,_1908.djvu"
     d = parse_book(book, page=int(page_number), html=True)
-    words, coords = d[0]
+    if d[0]:
+        words, coords = zip(*d[0])
 
     return (list(enumerate(coords)), list(enumerate(words)))
 
