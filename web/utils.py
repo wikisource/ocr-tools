@@ -3,7 +3,6 @@ import sys
 
 
 def gen_html(book, page_number):
-    book = "../Villiers_de_L'Isle-Adam_-_Tribulat_Bonhomet,_1908.djvu"
     d = parse_book(book, page=int(page_number), html=True)
     if d[0]:
         words, coords = zip(*d[0])

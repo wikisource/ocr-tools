@@ -9,14 +9,14 @@ import io
 class MainHandler(RequestHandler):
 
     def get(self, page_number):
-        areas, words = utils.gen_html("", page_number)
+        areas, words = utils.gen_html(self.settings["book"], page_number)
         self.render("index.html", page_number=page_number,
                     areas=areas, words=words)
 
 class ImageHandler(RequestHandler):
 
     def get(self, page_number):
-        im = image_from_book("../Villiers_de_L'Isle-Adam_-_Tribulat_Bonhomet,_1908.djvu", int(page_number))
+        im = image_from_book(self.settings["book"], int(page_number))
         self.set_header('Content-Type', 'image/jpg')
         img_buff = io.BytesIO()
         im.save(img_buff, format="JPEG")
