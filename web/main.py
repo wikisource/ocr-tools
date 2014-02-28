@@ -17,16 +17,16 @@ class ImageHandler(RequestHandler):
 
     def get(self, page_number):
         im = image_from_book("../Villiers_de_L'Isle-Adam_-_Tribulat_Bonhomet,_1908.djvu", int(page_number))
-        self.set_header('Content-Type', 'image/png')
+        self.set_header('Content-Type', 'image/jpg')
         img_buff = io.BytesIO()
-        im.save(img_buff, format="PNG")
+        im.save(img_buff, format="JPEG")
         img_buff.seek(0)
         self.write(img_buff.read())
         self.finish()
 
 application = Application([
     (r'/(\d+)/?', MainHandler),
-    (r'/(\d+)\.png/?', ImageHandler)]
+    (r'/(\d+)\.jpg/?', ImageHandler)]
     , **settings)
 
 if __name__ == '__main__':
