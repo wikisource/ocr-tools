@@ -61,7 +61,7 @@ def image_from_book(djvubook, page):
     width, height = page_job.size
     rect = (0, 0, width, height)
     buf = page_job.render(mode, rect, rect, djvu_pixel_format)
-    return Image.frombuffer("RGB", (width, height), buf, 'raw', 'RGB', 0, 1)
+    return Image.frombuffer("RGB", (width, height), buf, 'raw', 'RGB', 0, -1)
 
 if __name__ == "__main__":
     book = parse_book(sys.argv[1], page=[10,11], html=True)
