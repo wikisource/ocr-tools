@@ -156,25 +156,18 @@ def print_alignment(l1, l2, c2, alignment):
         for word in l2:
             print u"{0:>25} | {1}".format("", word)
 
-
-def alignment_to_sexp(alignment, sexp, l2):
-    alignment = iter(alignment)
-    for line in sexp:
-        if "word" not in line:
-            print line
+def alignment_to_sexp(l1, l2, c2, alignment):
+    r = []
+    prev = 0
+    for index, g in itertools.groupby(zip(l1, alignment), lambda x:x[1]):
+        word = " ".join([a[0] for a in g])
+        if not index:
+            r.append([word, []])
         else:
-            index = alignment.next()
-            if index == -1:
-                break
+            begin, end = index[0], index[-1]
+            if end > begin:
+                #need to find a better way to get the box coordinates
+                r.append([word, c2[begin]])
             else:
-                if type(index) == tuple:
-                    word = " ".join([l2[i] for i in list(index)])
-                else:
-                    try:
-                        word = l2[index]
-                    except IndexError:
-                        print index
-                word = word.encode("utf-8").encode("string-escape")
-                re.sub("(?P<begin>\d+ \d+ \d+ \d+\s)    \w+(?P<end>\)+$)",
-                       "\g<begin>{0}\g<end>".format(word), line)
-                print line
+                r.append([word, c2[begin]])
+    return r
