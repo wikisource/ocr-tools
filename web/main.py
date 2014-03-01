@@ -3,7 +3,7 @@ from tornado.web import RequestHandler, Application
 import tornado.ioloop
 from settings import settings
 import utils
-from parsedjvutext import image_from_book
+from djvu_utils import image_from_book
 import io
 
 class MainHandler(RequestHandler):
@@ -16,7 +16,7 @@ class MainHandler(RequestHandler):
 class ImageHandler(RequestHandler):
 
     def get(self, page_number):
-        im = image_from_book(self.settings["book"], int(page_number))
+        im = image_from_book("../" + self.settings["book"], int(page_number))
         self.set_header('Content-Type', 'image/jpg')
         img_buff = io.BytesIO()
         im.save(img_buff, format="JPEG")
