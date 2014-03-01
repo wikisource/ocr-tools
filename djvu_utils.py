@@ -6,28 +6,27 @@ from itertools import chain
 import collections
 from PIL import Image
 
-def parse_page(page, html=False):
-    s, page_size = page.text.sexpr, page.size[1]
+def parse_page(page):
+    s = page.text.sexpr
 
-    def aux(s, html):
+    def aux(s):
         if type(s) is djvu.sexpr.ListExpression:
             if len(s) == 0:
                 pass
             if str(s[0].value) == "word":
-                if html:
-                    coords = (s[1].value, page_size - s[4].value,
-                              s[3].value, page_size - s[2].value)
-                    coords = ",".join(map(str,coords))
-                else:
-                    coords = [s[i].value for i in xrange(1, 5)]
+                coords = [s[i].value for i in xrange(1, 5)]
                 word = s[5].value
                 yield (word.decode("utf-8"), coords)
             else:
-                for c in chain.from_iterable(aux(child, html) for child in s[5:]):
+                for c in chain.from_iterable(aux(child) for child in s[5:]):
                     yield c
         else:
             pass
-    return aux(s, html) if s else None
+    return aux(s) if s else None
+
+def convert_to_htmlcoord(coords, page_size):
+    return [",".join(map(str, [c[0], page_size - c[3],
+                               c[2], page_size - c[1]])) for c in coords]
 
 def get_document(djvufile):
     c = Context()
@@ -35,11 +34,10 @@ def get_document(djvufile):
     document.decoding_job.wait()
     return document
 
-def parse_book(djvubook, page=None, html=False):
+def parse_book(djvubook, page=None):
     """
     returns the list of words and coordinates from a djvu book.
     if page is None, returns the whole book.
-    if html is True, coordinates are computed from the bottom of the page
     """
     document = get_document(djvubook)
 
@@ -50,7 +48,7 @@ def parse_book(djvubook, page=None, html=False):
     else:
         toparse = document.pages
 
-    return [parse_page(page, html=html) for page in toparse]
+    return [parse_page(page) for page in toparse]
 
 def image_from_book(djvubook, page):
     document = get_document(djvubook)
@@ -66,4 +64,4 @@ def image_from_book(djvubook, page):
 if __name__ == "__main__":
     book = parse_book(sys.argv[1], page=[10,11], html=True)
     im = image_from_book(sys.argv[1], 11)
-    im.save("test.webp")
+    im.save("test.jpeg")
