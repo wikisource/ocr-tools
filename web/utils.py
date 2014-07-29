@@ -10,12 +10,12 @@ def gen_html(book, page_number):
     corrected_text = get_page(book, int(page_number))
     corrected_words = su.simplify(corrected_text).split()
     if d:
-        words, coords = zip(*d)
-        C = su.align(corrected_words, list(words), list(coords))
-        r = su.alignment_to_sexp(corrected_text.split(), words, coords, C[1])
-        corrected_words, coords = zip(*r)
-        coords_html = du.convert_to_htmlcoord(coords, page.size[1])
-    return (list(enumerate(coords_html)), list(enumerate(corrected_words)))
+        orig_words, orig_coords = zip(*d)
+        C = su.align(corrected_words, list(orig_words), list(orig_coords))
+        r = su.alignment_to_coord(corrected_text.split(), C[1])
+        corr_words, corr_coords_index = zip(*r)
+        orig_coords_html = du.convert_to_htmlcoord(orig_coords, page.size[1])
+    return orig_coords_html, orig_words, corr_coords_index, corr_words
 
 if __name__ == "__main__":
     gen_html(*sys.argv[1:3])

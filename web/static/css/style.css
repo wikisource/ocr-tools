@@ -10,3 +10,15 @@ span:hover {
     float: left;
     margin-right: 1em;
 }
+
+#texte-non-corrige {
+    margin-top:0cm;
+    width: 10cm;
+    float: left;
+}
+
+#texte-corrige {
+    margin-top:0cm;
+    width: 10cm;
+    float: left;
+}

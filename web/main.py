@@ -9,9 +9,9 @@ import io
 class MainHandler(RequestHandler):
 
     def get(self, page_number):
-        areas, words = utils.gen_html(self.settings["book"], page_number)
+        orig_coords, orig_words, corr_coords_index, corr_words = utils.gen_html(self.settings["book"], page_number)
         self.render("index.html", page_number=page_number,
-                    areas=areas, words=words)
+                    orig_coords=orig_coords, orig_words=orig_words, corr_words=corr_words, corr_coords_index=corr_coords_index)
 
 class ImageHandler(RequestHandler):
 
