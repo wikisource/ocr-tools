@@ -156,6 +156,13 @@ def print_alignment(l1, l2, c2, alignment):
         for word in l2:
             print u"{0:>25} | {1}".format("", word)
 
+def invert_align(alignment, n):
+    l = [[]] *n
+    for i, e in enumerate(alignment):
+        for a in e:
+            l[a].append(i)
+
+
 def alignment_to_coord(l1, alignment):
     # l1 list of corrected words
     # alignment list of size len(l1) qui mappe mots dans l2
@@ -165,13 +172,15 @@ def alignment_to_coord(l1, alignment):
     prev = 0
     for index, g in itertools.groupby(zip(l1, alignment), lambda x:x[1]):
         word = " ".join([a[0] for a in g])
-        if not index:
-            r.append([word, None])
-        else:
-            begin, end = index[0], index[-1]
-            if end > begin:
-                #need to find a better way to get the box coordinates
-                r.append([word, begin])
-            else:
-                r.append([word, begin])
+        r.append([word, index])
+        # if not index:
+        #     r.append([word, None])
+        # else:
+
+        #     begin, end = index[0], index[-1]
+        #     if end > begin:
+        #         #need to find a better way to get the box coordinates
+        #         r.append([word, begin])
+        #     else:
+        #         r.append([word, begin])
     return r
