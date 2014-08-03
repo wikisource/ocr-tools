@@ -157,11 +157,11 @@ def print_alignment(l1, l2, c2, alignment):
             print u"{0:>25} | {1}".format("", word)
 
 def invert_align(alignment, n):
-    l = [[]] *n
+    l = [[] for _ in range(n)]
     for i, e in enumerate(alignment):
         for a in e:
             l[a].append(i)
-
+    return l
 
 def alignment_to_coord(l1, alignment):
     # l1 list of corrected words
