@@ -1,6 +1,6 @@
 $(document).ready(function() {
     $('#page').mapster({
-        mapKey: 'data-id',
+        mapKey: 'data-orig',
         fillColor: 'ff0000',
         fillOpacity: 0.3,
         onMouseover: function (e) {
@@ -15,7 +15,9 @@ $(document).ready(function() {
     }).mapster('resize', 500);
 
     $("span").mouseenter(function() {
-        $('area[data-id='+$(this).attr("id").replace(/\D+/,"")+']').mapster("highlight");
+        $(this).attr("id").replace(/\D+/,"").split(",").map(function(e){
+            $('area[data-orig='+e+']').mapster("highlight");
+        })
     });
 
     $("span").mouseout(function() {

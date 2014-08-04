@@ -12,10 +12,9 @@ def gen_html(book, page_number):
     if d:
         orig_words, orig_coords = zip(*d)
         C = su.align(corrected_words, list(orig_words), list(orig_coords))
-        r = su.alignment_to_coord(corrected_text.split(), C[1])
-        corr_words, corr_coords_index = zip(*r)
+        corr_words = corrected_text.split()
         orig_coords_html = du.convert_to_htmlcoord(orig_coords, page.size[1])
-    return orig_coords_html, orig_words, corr_coords_index, corr_words
+    return orig_coords_html, orig_words, corr_words, C[1]
 
 if __name__ == "__main__":
     gen_html(*sys.argv[1:3])

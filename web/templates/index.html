@@ -6,7 +6,8 @@
 </div>
 <map name="wordmap">
   {% for i, coord in enumerate(orig_coords) %}
-  <area href="#" shape="rect" coords="{{coord}}" data-id="{{i}}" />
+  <area href="#" shape="rect" coords="{{coord}}" data-orig="{{i}}" />
+        {# data-corr="{{",".join(map(str,corr_coords_index[i]))}}" #}
   {% end %}
 </map>
 
@@ -19,7 +20,7 @@
 <div id="texte-corrige">
   <h3>Texte corrigé</h3>
   {% for i, word in enumerate(corr_words) %}
-  <span id="corr-{{corr_coords_index[i]}}">{{word}}</span>
+  <span id="corr-{{",".join(map(str,align[i]))}}">{{word}}</span>
   {% end %}
 </div>
 {% end %}
