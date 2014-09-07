@@ -2,22 +2,22 @@ import tornado.httpserver
 from tornado.web import RequestHandler, Application
 import tornado.ioloop
 from settings import settings
-import utils
-from djvu_utils import image_from_book
+from utils.djvu_utils import image_from_book
+from utils.wikisource import gen_html
 import io
 
 class MainHandler(RequestHandler):
 
     def get(self, page_number):
         orig_coords, orig_words, corr_words, align = \
-            utils.gen_html(self.settings["book"], page_number)
+            gen_html(self.settings["book"], page_number)
         self.render("index.html", page_number=page_number, orig_coords=orig_coords,
                     orig_words=orig_words, corr_words=corr_words, align=align)
 
 class ImageHandler(RequestHandler):
 
     def get(self, page_number):
-        im = image_from_book("../" + self.settings["book"], int(page_number))
+        im = image_from_book(self.settings["book"], int(page_number))
         self.set_header('Content-Type', 'image/jpg')
         img_buff = io.BytesIO()
         im.save(img_buff, format="JPEG")
@@ -25,12 +25,10 @@ class ImageHandler(RequestHandler):
         self.write(img_buff.read())
         self.finish()
 
-application = Application([
-    (r'/(\d+)/?', MainHandler),
-    (r'/(\d+)\.jpg/?', ImageHandler)]
-    , **settings)
-
-if __name__ == '__main__':
+def run():
+    application = Application([
+        (r'/(\d+)/?', MainHandler),
+        (r'/(\d+)\.jpg/?', ImageHandler)], **settings)
     http_server = tornado.httpserver.HTTPServer(application)
     http_server.listen(8888)
     print "Listening on 8888"
