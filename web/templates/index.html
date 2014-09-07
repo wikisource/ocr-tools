@@ -19,8 +19,6 @@
 </div>
 <div id="texte-corrige">
   <h3>Texte corrigé</h3>
-  {% for i, word in enumerate(corr_words) %}
-  <span id="corr-{{",".join(map(str,align[i]))}}">{{word}}</span>
-  {% end %}
+  {% raw corr_words %}
 </div>
 {% end %}
