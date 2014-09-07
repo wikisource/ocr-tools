@@ -1,14 +1,14 @@
 import djvu_utils as du
 import sys
 import string_utils as su
-from wikisource import get_page2
-
+from wikisource import get_page
 
 def gen_html(book, page_number):
     doc = du.get_document("../" + book)
-    page = doc.pages[int(page_number) - 1]
+    page = doc.pages[int(page_number)-1]
     d = du.parse_page(page)
-    elem, corrected_text = get_page2(open("test.txt").read())
+    corrected_text = get_page(book, int(page_number))
+    corrected_words = su.simplify(corrected_text).split()
     if d:
         orig_words, orig_coords = zip(*d)
         C = su.align(corrected_words, list(orig_words), list(orig_coords))
