@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from wikisource import get_page
-from parsedjvutext import parse_book
-import string_utils as su
+from utils.wikisource import get_page
+from utils.djvu_utils import parse_book
+import utils.string_utils as su
 
 wikibook = "Bloy - Le Sang du pauvre, Stock, 1932.djvu".replace(" ", "_")
 #wikibook = "Villiers de L'Isle-Adam - Tribulat Bonhomet, 1908.djvu".replace(" ", "_")
