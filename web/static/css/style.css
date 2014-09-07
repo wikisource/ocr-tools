@@ -27,4 +27,15 @@ span:hover {
     padding: 3.5em 2em;
     font-size: 18px;
     line-height: 180%;
+
+#texte-non-corrige {
+    margin-top:0cm;
+    width: 10cm;
+    float: left;
+}
+
+#texte-corrige {
+    margin-top:0cm;
+    width: 10cm;
+    float: left;
 }

@@ -10,11 +10,11 @@ def gen_html(book, page_number):
     d = du.parse_page(page)
     elem, corrected_text = get_page2(open("test.txt").read())
     if d:
-        words, coords = zip(*d)
-        C = su.align(corrected_text.split(), list(words), list(coords))
-        coords = [coords[e[0]] for e in C[1]]
-        coords_html = du.convert_to_htmlcoord(coords, page.size[1])
-    return (list(enumerate(coords_html)), str(elem))
+        orig_words, orig_coords = zip(*d)
+        C = su.align(corrected_words, list(orig_words), list(orig_coords))
+        corr_words = corrected_text.split()
+        orig_coords_html = du.convert_to_htmlcoord(orig_coords, page.size[1])
+    return orig_coords_html, orig_words, corr_words, C[1]
 
 if __name__ == "__main__":
     gen_html(*sys.argv[1:3])

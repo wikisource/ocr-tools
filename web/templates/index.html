@@ -1,13 +1,26 @@
 {% extends "layout.html" %}
 
 {% block main %}
-    <div id="image_container">
-        <img id="page" src="{{page_number}}.jpg" usemap="#wordmap" />
-    </div>
-    <map name="wordmap">{% for id, coords in areas %}
-        <area href="#" shape="rect" coords="{{coords}}" data-id="word-{{id}}" />{% end %}
-    </map>
-    <div id="text">
-        {% raw words %}
-    </div>
+<div id="image_container">
+  <img id="page" src="{{page_number}}.jpg" usemap="#wordmap" />
+</div>
+<map name="wordmap">
+  {% for i, coord in enumerate(orig_coords) %}
+  <area href="#" shape="rect" coords="{{coord}}" data-orig="{{i}}" />
+        {# data-corr="{{",".join(map(str,corr_coords_index[i]))}}" #}
+  {% end %}
+</map>
+
+<div id="texte-non-corrige">
+  <h3>Texte original</h3>
+  {% for i, word in enumerate(orig_words) %}
+  <span id="orig-{{i}}">{{word}}</span>
+  {% end %}
+</div>
+<div id="texte-corrige">
+  <h3>Texte corrigé</h3>
+  {% for i, word in enumerate(corr_words) %}
+  <span id="corr-{{",".join(map(str,align[i]))}}">{{word}}</span>
+  {% end %}
+</div>
 {% end %}
