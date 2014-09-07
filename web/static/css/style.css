@@ -10,3 +10,21 @@ span:hover {
     float: left;
     margin-right: 1em;
 }
+
+#text {
+    width: 460px;
+    float: left;
+}
+
+.pagetext p {
+    text-align: justify; 
+    -moz-hyphens: auto;
+    margin: 0;
+    text-indent: 1.5em;
+}
+
+.pagetext {
+    padding: 3.5em 2em;
+    font-size: 18px;
+    line-height: 180%;
+}

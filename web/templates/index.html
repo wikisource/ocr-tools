@@ -5,10 +5,9 @@
         <img id="page" src="{{page_number}}.jpg" usemap="#wordmap" />
     </div>
     <map name="wordmap">{% for id, coords in areas %}
-        <area href="#" shape="rect" coords="{{coords}}" data-id="{{id}}" />{% end %}
+        <area href="#" shape="rect" coords="{{coords}}" data-id="word-{{id}}" />{% end %}
     </map>
     <div id="text">
-    {% for id, word in words %}
-    <span id="{{id}}">{{word}}</span> {% end %}
+        {% raw words %}
     </div>
 {% end %}
