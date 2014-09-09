@@ -9,24 +9,22 @@ from PIL import Image
 def parse_page(page):
     s = page.text.sexpr
 
-    def aux(s):
+    def aux(s, page_size):
         if type(s) is djvu.sexpr.ListExpression:
             if len(s) == 0:
                 pass
             if str(s[0].value) == "word":
-                coords = [s[i].value for i in xrange(1, 5)]
+                c = [s[i].value for i in xrange(1, 5)]
+                coords = ",".join(map(str, [c[0], page_size -c[3],
+                                            c[2], page_size - c[1]]))
                 word = s[5].value
                 yield (word.decode("utf-8"), coords)
             else:
-                for c in chain.from_iterable(aux(child) for child in s[5:]):
+                for c in chain.from_iterable(aux(child, page_size) for child in s[5:]):
                     yield c
         else:
             pass
-    return aux(s) if s else None
-
-def convert_to_htmlcoord(coords, page_size):
-    return [",".join(map(str, [c[0], page_size - c[3],
-                               c[2], page_size - c[1]])) for c in coords]
+    return aux(s, page.size[1]) if s else None
 
 def get_document(djvufile):
     c = Context()
