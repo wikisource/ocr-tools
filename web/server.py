@@ -9,10 +9,11 @@ import io
 class MainHandler(RequestHandler):
 
     def get(self, page_number):
-        orig_coords, orig_words, corr_words, align = \
-            gen_html(self.settings["book"], page_number)
-        self.render("index.html", page_number=page_number, orig_coords=orig_coords,
-                    orig_words=orig_words, corr_words=corr_words, align=align)
+        orig_coords, orig_words, corr_words = \
+                                              gen_html(self.settings["book"], int(page_number))
+        self.render("index.html", page_number=page_number,
+                    orig_coords=orig_coords,
+                    orig_words=orig_words, corr_words=corr_words._elem)
 
 class ImageHandler(RequestHandler):
 
