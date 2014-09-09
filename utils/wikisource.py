@@ -13,7 +13,8 @@ URL = "http://fr.wikisource.org/w/index.php"
 def spanify(string, start=0):
     soup = BeautifulSoup()
     for i, word in enumerate(string.split()):
-        span = soup.new_tag("span", id="word-" + str(start + i))
+        span = soup.new_tag("span")
+        span["data-id"]=start + i
         span.string = word
         string.insert_before(span)
         string.insert_before(" ")
@@ -21,33 +22,53 @@ def spanify(string, start=0):
     return start + i + 1
 
 
-class HtmlText():
-
+class HtmlText(object):
+    ## This class takes the corrected html from a wikisource page
+    ## and adds extra information fo facilitate the mapping.
+    ## At initialization, it wraps each word into a <span>
+    ## with attribute data-id=i where i is the index of the corrected word.
+    ## Once we set align, it adds to each span an id attribute
+    ## of the form id="corr-x,y,z" where x, y, z are ids in
+    ## the image map.
     def __init__(self, elem):
-        self.elem = elem
+        self._elem = elem
         start = 0
-        strings = list(string for string in self.elem.strings
+        strings = list(string for string in self._elem.strings
                        if string.strip())
 
         for string in strings:
             start = spanify(string, start)
-        self.length = start
+        self._length = start
+        self._align = None
 
     def __len__(self):
-        return self.length
+        return self._length
 
     def __getitem__(self, key):
         if type(key) is SliceType:
             return [unicode(self[w]) for w in range(*key.indices(self.length))]
-        if key >= self.length:
+        if key >= len(self):
             raise IndexError
         if key < 0:
-            key = self.length - key
-        return self.elem.find("span", {"id": "word-" + str(key)}).text
+            key = len(self) - key
+        return self._elem.find("span", {"data-id": key}).text
+
+    def __unicode__(self):
+        return self._elem.text
 
     def __str__(self):
-        return str(self.elem)
+        return unicode(self).encode("utf-8")
 
+    @property
+    def align(self):
+        return self._align
+
+    @align.setter
+    def align(self, val):
+        self._align = val
+        for i in range(len(self)):
+            self._elem.find("span", {"data-id": i})['id']="corr-" + \
+            ",".join(map(str, val[i]))
 
 def get_page(title, page):
     params = {"action": "render", "title": "Page:" + title + "/" + str(page)}
@@ -66,21 +87,18 @@ def get_pages(title, begin=1, end=None):
                          (get_page(title, i) for i in count(begin)))
 
 def gen_html(book, page_number):
-    doc = du.get_document(book)
-    page = doc.pages[int(page_number)-1]
-    d = du.parse_page(page)
+    d = du.parse_book(book, page_number)[0]
     corrected_text = get_page(book, int(page_number))
-    corrected_words = su.simplify(corrected_text.elem.text).split()
+    corrected_words = su.simplify(unicode(corrected_text)).split()
     if d:
         orig_words, orig_coords = zip(*d)
         C = su.align(corrected_words, list(orig_words), list(orig_coords))
-        corr_words = corrected_text
-        orig_coords_html = du.convert_to_htmlcoord(orig_coords, page.size[1])
-    return orig_coords_html, orig_words, corr_words, C[1]
+        corrected_text.align = C[1]
+    return orig_coords, orig_words, corrected_text
 
 if __name__ == "__main__":
     wikibook = "Bloy - Le Sang du pauvre, Stock, 1932.djvu".replace(" ", "_")
-    test = get_page(wikibook, 28)
+    test = gen_html(wikibook, 28)
     # print type(c[0])
     # print su.align(c, [u"asd"], None)
     # print c[0:1]
