@@ -60,6 +60,6 @@ def image_from_book(djvubook, page):
     return Image.frombuffer("RGB", (width, height), buf, 'raw', 'RGB', 0, -1)
 
 if __name__ == "__main__":
-    book = parse_book(sys.argv[1], page=[10,11], html=True)
+    book = parse_book(sys.argv[1], page=[10,11])
     im = image_from_book(sys.argv[1], 11)
     im.save("test.jpeg")

@@ -71,6 +71,7 @@ class HtmlText(object):
             ",".join(map(str, val[i]))
 
 def get_page(title, page):
+    title = title.split('/')[-1]
     params = {"action": "render", "title": "Page:" + title + "/" + str(page)}
     r = requests.get(URL, params=params)
     if r.status_code == requests.codes.ok:
@@ -97,7 +98,7 @@ def gen_html(book, page_number):
     return orig_coords, orig_words, corrected_text
 
 if __name__ == "__main__":
-    wikibook = "Bloy - Le Sang du pauvre, Stock, 1932.djvu".replace(" ", "_")
+    wikibook = sys.argv[1]
     test = gen_html(wikibook, 28)
     # print type(c[0])
     # print su.align(c, [u"asd"], None)
